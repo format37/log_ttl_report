@@ -1,0 +1,15 @@
+ВЫБРАТЬ
+	MRMlogTTL.Код КАК id,
+	MRMlogTTL.Дата КАК date,
+	ЧАС(MRMlogTTL.Дата) КАК Hour,
+	МИНУТА(MRMlogTTL.Дата) КАК Minute,
+	СЕКУНДА(MRMlogTTL.Дата) КАК second,
+	MRMlogTTL.PhoneNumber КАК phone,
+	MRMlogTTL.logTTL КАК ttl
+ИЗ
+	Справочник.MRMlogTTL КАК MRMlogTTL
+ГДЕ
+	MRMlogTTL.PhoneNumber = &PhoneNumber
+	И MRMlogTTL.Дата >= &ДатаНач
+	И MRMlogTTL.Дата < &ДатаКон
+упорядочить по MRMlogTTL.Код
