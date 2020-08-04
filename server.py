@@ -15,29 +15,35 @@ def send_photo():
 	bot.send_photo(chat_id, photo)
 
 def get_len(last_string):
-	splitters = ['*','a','b','c','d','e','f','g','h','i','j']
-	ttl = []
-	for splitter in splitters:
-		new_string = last_string.split(splitter)
-		last_string = new_string[1]
-		ttl.append(new_string[0])
-	ttl.append(last_string)
-	first_value = int(ttl[2])
-	last_value = int(ttl[-2:][0])
-	return last_value-first_value
+	try:
+		splitters = ['*','a','b','c','d','e','f','g','h','i','j']
+		ttl = []
+		for splitter in splitters:
+			new_string = last_string.split(splitter)
+			last_string = new_string[1]
+			ttl.append(new_string[0])
+		ttl.append(last_string)
+		first_value = int(ttl[2])
+		last_value = int(ttl[-2:][0])
+		return last_value-first_value
+	except Exception as e:
+        return 0
 
 def get_func(last_string):
 	return last_string.split('*')[0]
 
 def get_timers(last_string,step):
-	splitters = ['*','a','b','c','d','e','f','g','h','i','j']
-	ttl = []
-	for splitter in splitters:
-		new_string = last_string.split(splitter)
-		last_string = new_string[1]
-		ttl.append(new_string[0])
-	ttl.append(last_string)    
-	return int(ttl[step])/1000
+	try:
+		splitters = ['*','a','b','c','d','e','f','g','h','i','j']
+		ttl = []
+		for splitter in splitters:
+			new_string = last_string.split(splitter)
+			last_string = new_string[1]
+			ttl.append(new_string[0])
+		ttl.append(last_string)    
+		return int(ttl[step])/1000
+	except Exception as e:
+        return 0
 
 def plot_versions(df):
 	#for func in df['func'].unique():
