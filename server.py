@@ -27,7 +27,7 @@ def get_len(last_string):
 		last_value = int(ttl[-2:][0])
 		return last_value-first_value
 	except Exception as e:
-        return 0
+		return 0
 
 def get_func(last_string):
 	return last_string.split('*')[0]
@@ -43,7 +43,7 @@ def get_timers(last_string,step):
 		ttl.append(last_string)    
 		return int(ttl[step])/1000
 	except Exception as e:
-        return 0
+		return 0
 
 def plot_versions(df):
 	#for func in df['func'].unique():
