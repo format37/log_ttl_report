@@ -1,5 +1,9 @@
+PORT = '8081'
+from aiohttp import web
+import asyncio
 import pandas as pd 
 import telebot
+
 
 data_path	= '/home/dvasilev/projects/log_ttl_report/ttl_aug_03.csv'
 
@@ -83,42 +87,56 @@ def plot_dates(df):
 	fig = graphic.get_figure()
 	fig.savefig("myplot.png")
 	send_photo()
-	
-# read data
-df = pd.read_csv(data_path,';')
-df.fillna(0, inplace=True)
 
-# ttl
-df['dev_len']=df['ttl'].apply(get_len)
+async def call_check(request):
+	return web.Response(text='ok',content_type="text/html")
 
-# functions
-df['func']=df['ttl'].apply(get_func)
+async def call_log_ttl_report(request):
+	# read data
+	df = pd.read_csv(data_path,';')
+	df.fillna(0, inplace=True)
 
-# stage timers
-timer_columns = ['a','b','c','d','e','f','g','h','i','j']
-for i in range(0,len(timer_columns)):
-	column_name = timer_columns[i]
-	df[column_name]=df['ttl'].apply(get_timers,step=i+2)
+	# ttl
+	df['dev_len']=df['ttl'].apply(get_len)
 
-# top & bottom bias, each phone
-for phone in df["phone"].unique():
-	mr = df[df.phone==phone].sort_values(by=['dev_len']).iloc[0] #minimal delay record
-	bias_top=(mr.h-mr.a-(mr.g-mr.b))/2-(mr.b-mr.a)
-	bias_bottom=(mr.f+bias_top-(mr.c+bias_top)-(mr.e-mr.d))/2-(mr.d-(mr.c+bias_top))
-	df.loc[df['phone'] == phone, 'bias_top'] = bias_top    
-	df.loc[df['phone'] == phone, 'bias_bottom'] = bias_bottom
+	# functions
+	df['func']=df['ttl'].apply(get_func)
 
-# delay between instances
-df['ab_mrm_to_back']      = df.b - df.a + df.bias_top    
-df['bc_back_to_back']     = df.c - df.b
-df['cd_back_to_1c']       = df.d - df.c + df.bias_bottom - df.bias_top
-df['de_1c_to_1c']         = df.e - df.d
-df['ef_1c_to_back']       = df.f - df.e + df.bias_top - df.bias_bottom
-df['fg_back_to_back']     = df.g - df.f
-df['gh_back_to_mrm']      = df.h - df.g - df.bias_top
-df['hi_mrm_to_mrm']       = df.i - df.h
+	# stage timers
+	timer_columns = ['a','b','c','d','e','f','g','h','i','j']
+	for i in range(0,len(timer_columns)):
+		column_name = timer_columns[i]
+		df[column_name]=df['ttl'].apply(get_timers,step=i+2)
 
-# plot
-plot_versions(df)
-df['day'] = df['date'].str.split().str[0]
-plot_dates(df)
+	# top & bottom bias, each phone
+	for phone in df["phone"].unique():
+		mr = df[df.phone==phone].sort_values(by=['dev_len']).iloc[0] #minimal delay record
+		bias_top=(mr.h-mr.a-(mr.g-mr.b))/2-(mr.b-mr.a)
+		bias_bottom=(mr.f+bias_top-(mr.c+bias_top)-(mr.e-mr.d))/2-(mr.d-(mr.c+bias_top))
+		df.loc[df['phone'] == phone, 'bias_top'] = bias_top    
+		df.loc[df['phone'] == phone, 'bias_bottom'] = bias_bottom
+
+	# delay between instances
+	df['ab_mrm_to_back']      = df.b - df.a + df.bias_top    
+	df['bc_back_to_back']     = df.c - df.b
+	df['cd_back_to_1c']       = df.d - df.c + df.bias_bottom - df.bias_top
+	df['de_1c_to_1c']         = df.e - df.d
+	df['ef_1c_to_back']       = df.f - df.e + df.bias_top - df.bias_bottom
+	df['fg_back_to_back']     = df.g - df.f
+	df['gh_back_to_mrm']      = df.h - df.g - df.bias_top
+	df['hi_mrm_to_mrm']       = df.i - df.h
+
+	# plot
+	plot_versions(df)
+	df['day'] = df['date'].str.split().str[0]
+	plot_dates(df)
+	return web.Response(text='ok',content_type="text/html")
+
+app = web.Application()
+app.router.add_route('GET', '/check',	call_check)
+app.router.add_route('GET', '/log_ttl_report',	call_log_ttl_report)
+
+web.run_app(
+    app,
+    port=PORT,
+)
