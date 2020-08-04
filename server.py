@@ -1,11 +1,11 @@
 import pandas as pd 
 import telebot
 
-data_path	= '/home/alex/projects/log_ttl_report/ttl_aug_03.csv'
+data_path	= '/home/dvasilev/projects/log_ttl_report/ttl_aug_03.csv'
 
 def send_photo():
 	chat_id = '106129214'
-	script_path = '/home/alex/projects/log_ttl_report/'	
+	script_path = '/home/dvasilev/projects/log_ttl_report/'	
 	with open(script_path+'token.key','r') as file:
 		api_token=file.read().replace('\n', '')
 		file.close()
