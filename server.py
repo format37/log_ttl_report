@@ -4,7 +4,7 @@ import asyncio
 import pandas as pd 
 import telebot
 
-def send_photo(script_path):
+def send_photo():
 	script_path = '/home/dvasilev/projects/log_ttl_report/'
 	chat_id = '-342878753' # mrm events
 	
