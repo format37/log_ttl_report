@@ -4,7 +4,6 @@ import asyncio
 import pandas as pd 
 import telebot
 
-
 data_path	= '/home/dvasilev/projects/log_ttl_report/ttl_aug_03.csv'
 
 def send_photo():
@@ -132,10 +131,16 @@ async def call_log_ttl_report(request):
 	plot_dates(df)
 	return web.Response(text='ok',content_type="text/html")
 
-app = web.Application()
-app.router.add_route('GET', '/check',	call_check)
-app.router.add_route('GET', '/log_ttl_report',	call_log_ttl_report)
+# Process calls
+async def handle(request):
+	return web.Response(text='ok',content_type="text/html")
+	
+app = web.Application()	
+app.router.add_post('/log_ttl_report', call_log_ttl_report)
+#app.router.add_route('GET', '/check',	call_check)
+#app.router.add_route('GET', '/log_ttl_report',	call_log_ttl_report)
 
+# Start aiohttp server
 web.run_app(
     app,
     port=PORT,
