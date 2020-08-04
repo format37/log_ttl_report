@@ -132,11 +132,13 @@ async def call_log_ttl_report(request):
 	return web.Response(text='ok',content_type="text/html")
 
 # Process calls
-async def handle(request):
-	return web.Response(text='ok',content_type="text/html")
+async def call_log_ttl_report_test(request):
+	result = await request.text()
+	return web.Response(text=result,content_type="text/html")
 	
 app = web.Application()	
-app.router.add_post('/log_ttl_report', call_log_ttl_report)
+#app.router.add_post('/log_ttl_report', call_log_ttl_report)
+app.router.add_post('/log_ttl_report', call_log_ttl_report_test)
 #app.router.add_route('GET', '/check',	call_check)
 #app.router.add_route('GET', '/log_ttl_report',	call_log_ttl_report)
 
