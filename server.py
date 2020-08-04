@@ -87,10 +87,12 @@ def plot_dates(df):
 	fig.savefig("myplot.png")
 	send_photo()
 
-async def call_check(request):
-	return web.Response(text='ok',content_type="text/html")
-
 async def call_log_ttl_report(request):
+	
+	# save data
+	with open('data.csv', 'w') as file: # change filename to token if call can be parallel
+    	file.write(await request.text())
+	
 	# read data
 	df = pd.read_csv(data_path,';')
 	df.fillna(0, inplace=True)
@@ -130,17 +132,9 @@ async def call_log_ttl_report(request):
 	df['day'] = df['date'].str.split().str[0]
 	plot_dates(df)
 	return web.Response(text='ok',content_type="text/html")
-
-# Process calls
-async def call_log_ttl_report_test(request):
-	result = await request.text()
-	return web.Response(text=result,content_type="text/html")
 	
 app = web.Application()	
-#app.router.add_post('/log_ttl_report', call_log_ttl_report)
-app.router.add_post('/log_ttl_report', call_log_ttl_report_test)
-#app.router.add_route('GET', '/check',	call_check)
-#app.router.add_route('GET', '/log_ttl_report',	call_log_ttl_report)
+app.router.add_post('/log_ttl_report', call_log_ttl_report)
 
 # Start aiohttp server
 web.run_app(
