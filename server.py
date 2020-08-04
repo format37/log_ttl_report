@@ -4,14 +4,15 @@ import asyncio
 import pandas as pd 
 import telebot
 
-def send_photo():
+def send_photo(script_path):
+	script_path = '/home/dvasilev/projects/log_ttl_report/'
 	chat_id = '-342878753' # mrm events
-	script_path = '/home/dvasilev/projects/log_ttl_report/'	
+	
 	with open(script_path+'token.key','r') as file:
 		api_token=file.read().replace('\n', '')
 		file.close()
 	bot = telebot.TeleBot(api_token)
-	photo = open('myplot.png', 'rb')
+	photo = open(script_path+'myplot.png', 'rb')
 	bot.send_photo(chat_id, photo)
 
 def get_len(last_string):
@@ -46,6 +47,7 @@ def get_timers(last_string,step):
 		return 0
 
 def plot_versions(df):
+	script_path = '/home/dvasilev/projects/log_ttl_report/'
 	graphic = df.groupby('AppVersion').median().plot(
 		y=[
 			'ab_mrm_to_back',
@@ -62,10 +64,11 @@ def plot_versions(df):
 		figsize=(15,6)
 	)
 	fig = graphic.get_figure()
-	fig.savefig("myplot.png")
+	fig.savefig(script_path+"myplot.png")
 	send_photo()
 
 def plot_dates(df):
+	script_path = '/home/dvasilev/projects/log_ttl_report/'
 	graphic = df.groupby('day').median().plot(        
 		y=[
 			'ab_mrm_to_back',
@@ -82,17 +85,19 @@ def plot_dates(df):
 		figsize=(15,6)
 	)
 	fig = graphic.get_figure()
-	fig.savefig("myplot.png")
+	fig.savefig(script_path+"myplot.png")
 	send_photo()
 
 async def call_log_ttl_report(request):
 	
+	script_path = '/home/dvasilev/projects/log_ttl_report/'
+	
 	# save data
-	with open('data.csv', 'w') as file: # change filename to token if call can be parallel
+	with open(script_path+'data.csv', 'w') as file: # change filename to token if call can be parallel
 		file.write(await request.text())
 	
 	# read data
-	df = pd.read_csv('data.csv',';')
+	df = pd.read_csv(script_path+'data.csv',';')
 	df.fillna(0, inplace=True)
 
 	# ttl
