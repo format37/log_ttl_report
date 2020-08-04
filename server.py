@@ -46,8 +46,6 @@ def get_timers(last_string,step):
 		return 0
 
 def plot_versions(df):
-	#for func in df['func'].unique():
-		#graphic = df[df.func==func].groupby('AppVersion').median().plot(
 	graphic = df.groupby('AppVersion').median().plot(
 		y=[
 			'ab_mrm_to_back',
@@ -61,7 +59,6 @@ def plot_versions(df):
 		],
 		kind='bar',
 		title = 'log ttl: version',
-		#subplots=True,
 		figsize=(15,6)
 	)
 	fig = graphic.get_figure()
@@ -69,8 +66,6 @@ def plot_versions(df):
 	send_photo()
 
 def plot_dates(df):
-	#for func in df['func'].unique():
-		#graphic = df[df.func==func].groupby('AppVersion').median().plot(
 	graphic = df.groupby('day').median().plot(        
 		y=[
 			'ab_mrm_to_back',
@@ -84,8 +79,7 @@ def plot_dates(df):
 		],
 		kind='bar',
 		title = 'log ttl: date',
-		#subplots=True,
-		figsize=(15,4)
+		figsize=(15,6)
 	)
 	fig = graphic.get_figure()
 	fig.savefig("myplot.png")
