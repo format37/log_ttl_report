@@ -131,7 +131,7 @@ async def call_log_ttl_report(request):
 	plot_dates(df)
 	return web.Response(text='ok',content_type="text/html")
 	
-app = web.Application()	
+app = web.Application(client_max_size=1024**3)	
 app.router.add_post('/log_ttl_report', call_log_ttl_report)
 
 # Start aiohttp server
