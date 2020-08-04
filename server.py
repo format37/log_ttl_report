@@ -53,7 +53,7 @@ def plot_versions(df):
 			'hi_mrm_to_mrm',
 		],
 		kind='bar',
-		#title = func,
+		title = 'log ttl: version',
 		#subplots=True,
 		figsize=(15,6)
 	)
@@ -76,7 +76,7 @@ def plot_dates(df):
 			'hi_mrm_to_mrm',
 		],
 		kind='bar',
-		#title = func,
+		title = 'log ttl: date',
 		#subplots=True,
 		figsize=(15,4)
 	)
