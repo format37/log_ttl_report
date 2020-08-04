@@ -91,7 +91,7 @@ async def call_log_ttl_report(request):
 	
 	# save data
 	with open('data.csv', 'w') as file: # change filename to token if call can be parallel
-    	file.write(await request.text())
+		file.write(await request.text())
 	
 	# read data
 	df = pd.read_csv(data_path,';')
