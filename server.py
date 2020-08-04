@@ -5,7 +5,7 @@ import pandas as pd
 import telebot
 
 def send_photo():
-	chat_id = '106129214'
+	chat_id = '-342878753' # mrm events
 	script_path = '/home/dvasilev/projects/log_ttl_report/'	
 	with open(script_path+'token.key','r') as file:
 		api_token=file.read().replace('\n', '')
