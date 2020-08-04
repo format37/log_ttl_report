@@ -4,8 +4,6 @@ import asyncio
 import pandas as pd 
 import telebot
 
-data_path	= '/home/dvasilev/projects/log_ttl_report/ttl_aug_03.csv'
-
 def send_photo():
 	chat_id = '106129214'
 	script_path = '/home/dvasilev/projects/log_ttl_report/'	
@@ -94,7 +92,7 @@ async def call_log_ttl_report(request):
 		file.write(await request.text())
 	
 	# read data
-	df = pd.read_csv(data_path,';')
+	df = pd.read_csv('data.csv',';')
 	df.fillna(0, inplace=True)
 
 	# ttl
