@@ -90,14 +90,15 @@ def plot_dates(df):
 
 async def call_log_ttl_report(request):
 
-	script_path = '/home/dvasilev/projects/log_ttl_report/'
+	#data_path = '/home/dvasilev/projects/log_ttl_report/'
+	data_path = '/var/www/html/log_ttl_data/'
 
 	# save data
-	with open(script_path+'data.csv', 'w') as file: # change filename to token if call can be parallel
+	with open(data_path+'data.csv', 'w') as file: # change filename to token if call can be parallel
 		file.write(await request.text())
 
 	# read data
-	df = pd.read_csv(script_path+'data.csv',';')
+	df = pd.read_csv(data_path+'data.csv',';')
 	df.fillna(0, inplace=True)
 
 	# ttl
