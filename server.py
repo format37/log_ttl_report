@@ -114,7 +114,10 @@ async def call_log_ttl_report(request):
 
 	# top & bottom bias, each phone
 	for phone in df["phone"].unique():
-		mr = df[df.phone==phone].sort_values(by=['dev_len']).iloc[0] #minimal delay record
+		sel = df[df.phone==phone]
+    	sel = sel[sel.dev_len!=0]    
+    	mr  = sel[sel.phone==phone].sort_values(by=['dev_len']).iloc[0] #minimal delay record
+		#mr = df[df.phone==phone].sort_values(by=['dev_len']).iloc[0] #minimal delay record
 		bias_top=(mr.h-mr.a-(mr.g-mr.b))/2-(mr.b-mr.a)
 		bias_bottom=(mr.f+bias_top-(mr.c+bias_top)-(mr.e-mr.d))/2-(mr.d-(mr.c+bias_top))
 		df.loc[df['phone'] == phone, 'bias_top'] = bias_top    
