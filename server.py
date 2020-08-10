@@ -49,17 +49,17 @@ def get_timers(last_string,step):
 def plot_versions(df,func):
 	script_path = '/home/dvasilev/projects/log_ttl_report/'
 	graphic = df[df.func==func].groupby('AppVersion').median().plot(
-        y=[
-            'ab_mrm_to_back',
-            'gh_back_to_mrm',
-            'hi_mrm_to_mrm'
-        ],
-        kind='bar',
-        title = func,
-        figsize=(15,6),
-    )
-    fig = graphic.get_figure()
-    fig.savefig("myplot.png")
+		y=[
+			'ab_mrm_to_back',
+			'gh_back_to_mrm',
+			'hi_mrm_to_mrm'
+		],
+		kind='bar',
+		title = func,
+		figsize=(15,6),
+	)
+	fig = graphic.get_figure()
+	fig.savefig("myplot.png")
 	send_photo()
 
 def plot_dates(df):
@@ -135,7 +135,7 @@ async def call_log_ttl_report(request):
 	plot_versions(df,'bidinfo')
 	df['day'] = df['date'].str.split().str[0]
 	plot_dates(df)		
-	
+
 	return web.Response(text='ok',content_type="text/html")
 
 app = web.Application(client_max_size=1024**3)	
