@@ -59,7 +59,7 @@ def plot_versions(df,func):
 		figsize=(15,6),
 	)
 	fig = graphic.get_figure()
-	fig.savefig("myplot.png")
+	fig.savefig(script_path+'myplot.png')
 	send_photo()
 
 def plot_dates(df):
