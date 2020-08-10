@@ -7,7 +7,7 @@ import telebot
 def send_photo():
 	script_path = '/home/dvasilev/projects/log_ttl_report/'
 	chat_id = '-342878753' # mrm events
-	
+
 	with open(script_path+'token.key','r') as file:
 		api_token=file.read().replace('\n', '')
 		file.close()
@@ -89,13 +89,13 @@ def plot_dates(df):
 	send_photo()
 
 async def call_log_ttl_report(request):
-	
+
 	script_path = '/home/dvasilev/projects/log_ttl_report/'
-	
+
 	# save data
 	with open(script_path+'data.csv', 'w') as file: # change filename to token if call can be parallel
 		file.write(await request.text())
-	
+
 	# read data
 	df = pd.read_csv(script_path+'data.csv',';')
 	df.fillna(0, inplace=True)
@@ -115,8 +115,8 @@ async def call_log_ttl_report(request):
 	# top & bottom bias, each phone
 	for phone in df["phone"].unique():
 		sel = df[df.phone==phone]
-    	sel = sel[sel.dev_len!=0]    
-    	mr  = sel[sel.phone==phone].sort_values(by=['dev_len']).iloc[0] #minimal delay record
+		sel = sel[sel.dev_len!=0]    
+		mr  = sel[sel.phone==phone].sort_values(by=['dev_len']).iloc[0] #minimal delay record
 		#mr = df[df.phone==phone].sort_values(by=['dev_len']).iloc[0] #minimal delay record
 		bias_top=(mr.h-mr.a-(mr.g-mr.b))/2-(mr.b-mr.a)
 		bias_bottom=(mr.f+bias_top-(mr.c+bias_top)-(mr.e-mr.d))/2-(mr.d-(mr.c+bias_top))
@@ -138,12 +138,12 @@ async def call_log_ttl_report(request):
 	df['day'] = df['date'].str.split().str[0]
 	plot_dates(df)
 	return web.Response(text='ok',content_type="text/html")
-	
+
 app = web.Application(client_max_size=1024**3)	
 app.router.add_post('/log_ttl_report', call_log_ttl_report)
 
 # Start aiohttp server
 web.run_app(
-    app,
-    port=PORT,
+	app,
+	port=PORT,
 )
