@@ -46,25 +46,20 @@ def get_timers(last_string,step):
 	except Exception as e:
 		return 0
 
-def plot_versions(df):
+def plot_versions(df,func):
 	script_path = '/home/dvasilev/projects/log_ttl_report/'
-	graphic = df.groupby('AppVersion').median().plot(
-		y=[
-			'ab_mrm_to_back',
-			'bc_back_to_back',
-			'cd_back_to_1c',
-			#'de_1c_to_1c',
-			'ef_1c_to_back',
-			'fg_back_to_back',
-			'gh_back_to_mrm',
-			'hi_mrm_to_mrm',
-		],
-		kind='bar',
-		title = 'log ttl: version',
-		figsize=(15,6)
-	)
-	fig = graphic.get_figure()
-	fig.savefig(script_path+"myplot.png")
+	graphic = df[df.func==func].groupby('AppVersion').median().plot(
+        y=[
+            'ab_mrm_to_back',
+            'gh_back_to_mrm',
+            'hi_mrm_to_mrm'
+        ],
+        kind='bar',
+        title = func,
+        figsize=(15,6),
+    )
+    fig = graphic.get_figure()
+    fig.savefig("myplot.png")
 	send_photo()
 
 def plot_dates(df):
@@ -135,9 +130,12 @@ async def call_log_ttl_report(request):
 	df['hi_mrm_to_mrm']       = df.i - df.h
 
 	# plot
-	plot_versions(df)
+	plot_versions(df,'bidphotoadd')
+	plot_versions(df,'bidlist')
+	plot_versions(df,'bidinfo')
 	df['day'] = df['date'].str.split().str[0]
-	plot_dates(df)
+	plot_dates(df)		
+	
 	return web.Response(text='ok',content_type="text/html")
 
 app = web.Application(client_max_size=1024**3)	
