@@ -114,12 +114,12 @@ async def call_log_ttl_report(request):
 	# top & bottom bias, each phone
 	for phone in df["phone"].unique():
 		for backend in df[df['phone'] == phone].Backend.unique():
-		mask = ( df['phone'] == phone) & (df['Backend']==backend)
-		mr = df[mask].sort_values(by=['dev_len']).iloc[0] #minimal delay record
-		bias_top=(mr.h-mr.a-(mr.g-mr.b))/2-(mr.b-mr.a)
-		bias_bottom=(mr.f+bias_top-(mr.c+bias_top)-(mr.e-mr.d))/2-(mr.d-(mr.c+bias_top))
-		df.loc[mask, 'bias_top'] = bias_top
-		df.loc[mask, 'bias_bottom'] = bias_bottom
+			mask = ( df['phone'] == phone) & (df['Backend']==backend)
+			mr = df[mask].sort_values(by=['dev_len']).iloc[0] #minimal delay record
+			bias_top=(mr.h-mr.a-(mr.g-mr.b))/2-(mr.b-mr.a)
+			bias_bottom=(mr.f+bias_top-(mr.c+bias_top)-(mr.e-mr.d))/2-(mr.d-(mr.c+bias_top))
+			df.loc[mask, 'bias_top'] = bias_top
+			df.loc[mask, 'bias_bottom'] = bias_bottom
 
 	# delay between instances
 	df['ab_mrm_to_back']      = df.b - df.a + df.bias_top    
