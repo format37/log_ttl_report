@@ -54,9 +54,10 @@ def plot_versions(df,func):
 			'gh_back_to_mrm',
 			'hi_mrm_to_mrm'
 		],
-		kind='bar',
+		kind='barh',
 		title = func,
-		figsize=(15,6),
+		figsize=(15,15),
+		grid = True
 	)
 	fig = graphic.get_figure()
 	fig.savefig(script_path+'myplot.png')
@@ -74,10 +75,12 @@ def plot_dates(df):
 			'fg_back_to_back',
 			'gh_back_to_mrm',
 			'hi_mrm_to_mrm',
+			'full_len'
 		],
-		kind='bar',
+		kind='barh',
 		title = 'log ttl: date',
-		figsize=(15,6)
+		figsize=(15,15),
+		grid = True
 	)
 	fig = graphic.get_figure()
 	fig.savefig(script_path+"myplot.png")
@@ -110,14 +113,13 @@ async def call_log_ttl_report(request):
 
 	# top & bottom bias, each phone
 	for phone in df["phone"].unique():
-		sel = df[df.phone==phone]
-		sel = sel[sel.dev_len!=0]    
-		mr  = sel[sel.phone==phone].sort_values(by=['dev_len']).iloc[0] #minimal delay record
-		#mr = df[df.phone==phone].sort_values(by=['dev_len']).iloc[0] #minimal delay record
-		bias_top=(mr.h-mr.a-(mr.g-mr.b))/2-(mr.b-mr.a)
-		bias_bottom=(mr.f+bias_top-(mr.c+bias_top)-(mr.e-mr.d))/2-(mr.d-(mr.c+bias_top))
-		df.loc[df['phone'] == phone, 'bias_top'] = bias_top    
-		df.loc[df['phone'] == phone, 'bias_bottom'] = bias_bottom
+		for backend in df[df['phone'] == phone].Backend.unique():
+        mask = ( df['phone'] == phone) & (df['Backend']==backend)
+        mr = df[mask].sort_values(by=['dev_len']).iloc[0] #minimal delay record
+        bias_top=(mr.h-mr.a-(mr.g-mr.b))/2-(mr.b-mr.a)
+        bias_bottom=(mr.f+bias_top-(mr.c+bias_top)-(mr.e-mr.d))/2-(mr.d-(mr.c+bias_top))
+        df.loc[mask, 'bias_top'] = bias_top
+        df.loc[mask, 'bias_bottom'] = bias_bottom
 
 	# delay between instances
 	df['ab_mrm_to_back']      = df.b - df.a + df.bias_top    
@@ -128,11 +130,12 @@ async def call_log_ttl_report(request):
 	df['fg_back_to_back']     = df.g - df.f
 	df['gh_back_to_mrm']      = df.h - df.g - df.bias_top
 	df['hi_mrm_to_mrm']       = df.i - df.h
-
+	df['full_len']=df['ab_mrm_to_back']+df['bc_back_to_back']+df['cd_back_to_1c']+df['de_1c_to_1c']+df['ef_1c_to_back']+df['fg_back_to_back']+df['gh_back_to_mrm']+df['hi_mrm_to_mrm']
+	
 	# plot
 	plot_versions(df,'bidphotoadd')
 	plot_versions(df,'bidlist')
-	plot_versions(df,'bidinfo')
+	#plot_versions(df,'bidinfo')
 	df['day'] = df['date'].str.split().str[0]
 	plot_dates(df)		
 
