@@ -93,10 +93,29 @@ async def call_log_ttl_report(request):
 
 	# save data
 	with open(data_path+'data.csv', 'w') as file: # change filename to token if call can be parallel
-		file.write(await request.text())
+		file.write(await request.text())		
 
 	# read data
-	df = pd.read_csv(data_path+'data.csv',';')
+	params_part = True
+	#url = 'https://service.icecorp.ru/log_ttl_data/data.csv'
+	#with urllib.request.urlopen(url) as response:
+	with open(data_path+'data.csv', 'r') as source_file:
+		lines = source_file.readlines()
+		with open('params.csv', 'wb') as params_file:
+			with open('data_clear.csv', 'wb') as data_file:
+				for line in lines:
+					if line==b'id;date;phone;ttl;AppVersion;osversion;devicename;Backend\n':
+						params_part = False
+					if params_part:
+						params_file.write(line)
+					else:        
+						data_file.write(line)
+			data_file.close()
+		params_file.close()
+	source_file.close()
+	params = pd.read_csv("params.csv",';')
+
+	df = pd.read_csv('data_clear.csv',';')
 	df.fillna(0, inplace=True)
 
 	# ttl
