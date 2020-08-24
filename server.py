@@ -1,7 +1,8 @@
 PORT = '8083'
 from aiohttp import web
 import asyncio
-import pandas as pd 
+import pandas as pd
+import numpy as np
 import telebot
 
 def send_photo():
@@ -46,16 +47,16 @@ def get_timers(last_string,step):
 	except Exception as e:
 		return 0
 
-def plot_versions(df,func):
+def plot_versions(df,func,title):
 	script_path = '/home/dvasilev/projects/log_ttl_report/'
-	graphic = df[df.func==func].groupby('AppVersion').median().plot(
+	graphic = df[df.func==func].groupby('AppVersion').mean().plot(
 		y=[
 			'ab_mrm_to_back',
 			'gh_back_to_mrm',
 			'hi_mrm_to_mrm'
 		],
 		kind='barh',
-		title = func,
+		title = title,
 		figsize=(15,15),
 		grid = True
 	)
@@ -63,9 +64,9 @@ def plot_versions(df,func):
 	fig.savefig(script_path+'myplot.png')
 	send_photo()
 
-def plot_dates(df):
+def plot_dates(df,title):
 	script_path = '/home/dvasilev/projects/log_ttl_report/'
-	graphic = df.groupby('day').median().plot(        
+	graphic = df.groupby('day').mean().plot(        
 		y=[
 			'ab_mrm_to_back',
 			'bc_back_to_back',
@@ -78,7 +79,7 @@ def plot_dates(df):
 			'full_len'
 		],
 		kind='barh',
-		title = 'log ttl: date',
+		title = title,
 		figsize=(15,15),
 		grid = True
 	)
@@ -97,9 +98,7 @@ async def call_log_ttl_report(request):
 
 	# read data
 	params_part = True
-	#url = 'https://service.icecorp.ru/log_ttl_data/data.csv'
-	#with urllib.request.urlopen(url) as response:
-	with open(data_path+'data.csv', 'r') as source_file:
+	with open(data_path+'data.csv', 'rb') as source_file:
 		lines = source_file.readlines()
 		with open('params.csv', 'wb') as params_file:
 			with open('data_clear.csv', 'wb') as data_file:
@@ -115,48 +114,66 @@ async def call_log_ttl_report(request):
 	source_file.close()
 	params = pd.read_csv("params.csv",';')
 
-	df = pd.read_csv('data_clear.csv',';')
-	df.fillna(0, inplace=True)
+	if params.iloc()[0].send_report:
 
-	# ttl
-	df['dev_len']=df['ttl'].apply(get_len)
+		df = pd.read_csv('data_clear.csv',';')
+		df.fillna(0, inplace=True)
 
-	# functions
-	df['func']=df['ttl'].apply(get_func)
+		# ttl
+		df['dev_len']=df['ttl'].apply(get_len)
 
-	# stage timers
-	timer_columns = ['a','b','c','d','e','f','g','h','i','j']
-	for i in range(0,len(timer_columns)):
-		column_name = timer_columns[i]
-		df[column_name]=df['ttl'].apply(get_timers,step=i+2)
+		# functions
+		df['func']=df['ttl'].apply(get_func)
 
-	# top & bottom bias, each phone
-	for phone in df["phone"].unique():
-		for backend in df[df['phone'] == phone].Backend.unique():
-			mask = ( df['phone'] == phone) & (df['Backend']==backend)
-			mr = df[mask].sort_values(by=['dev_len']).iloc[0] #minimal delay record
-			bias_top=(mr.h-mr.a-(mr.g-mr.b))/2-(mr.b-mr.a)
-			bias_bottom=(mr.f+bias_top-(mr.c+bias_top)-(mr.e-mr.d))/2-(mr.d-(mr.c+bias_top))
-			df.loc[mask, 'bias_top'] = bias_top
-			df.loc[mask, 'bias_bottom'] = bias_bottom
+		# stage timers
+		timer_columns = ['a','b','c','d','e','f','g','h','i','j']
+		for i in range(0,len(timer_columns)):
+			column_name = timer_columns[i]
+			df[column_name]=df['ttl'].apply(get_timers,step=i+2)
 
-	# delay between instances
-	df['ab_mrm_to_back']      = df.b - df.a + df.bias_top    
-	df['bc_back_to_back']     = df.c - df.b
-	df['cd_back_to_1c']       = df.d - df.c + df.bias_bottom - df.bias_top
-	df['de_1c_to_1c']         = df.e - df.d
-	df['ef_1c_to_back']       = df.f - df.e + df.bias_top - df.bias_bottom
-	df['fg_back_to_back']     = df.g - df.f
-	df['gh_back_to_mrm']      = df.h - df.g - df.bias_top
-	df['hi_mrm_to_mrm']       = df.i - df.h
-	df['full_len']=df['ab_mrm_to_back']+df['bc_back_to_back']+df['cd_back_to_1c']+df['de_1c_to_1c']+df['ef_1c_to_back']+df['fg_back_to_back']+df['gh_back_to_mrm']+df['hi_mrm_to_mrm']
+		# top & bottom bias, each phone
+		for phone in df["phone"].unique():
+			for backend in df[df['phone'] == phone].Backend.unique():
+				mask = ( df['phone'] == phone) & (df['Backend']==backend)
+				mr = df[mask].sort_values(by=['dev_len']).iloc[0] #minimal delay record
+				bias_top=(mr.h-mr.a-(mr.g-mr.b))/2-(mr.b-mr.a)
+				bias_bottom=(mr.f+bias_top-(mr.c+bias_top)-(mr.e-mr.d))/2-(mr.d-(mr.c+bias_top))
+				df.loc[mask, 'bias_top'] = bias_top
+				df.loc[mask, 'bias_bottom'] = bias_bottom
 
-	# plot
-	plot_versions(df,'bidphotoadd')
-	plot_versions(df,'bidlist')
-	#plot_versions(df,'bidinfo')
-	df['day'] = df['date'].str.split().str[0]
-	plot_dates(df)		
+		# delay between instances
+		df['ab_mrm_to_back']      = df.b - df.a + df.bias_top    
+		df['bc_back_to_back']     = df.c - df.b
+		df['cd_back_to_1c']       = df.d - df.c + df.bias_bottom - df.bias_top
+		df['de_1c_to_1c']         = df.e - df.d
+		df['ef_1c_to_back']       = df.f - df.e + df.bias_top - df.bias_bottom
+		df['fg_back_to_back']     = df.g - df.f
+		df['gh_back_to_mrm']      = df.h - df.g - df.bias_top
+		df['hi_mrm_to_mrm']       = df.i - df.h
+		df['full_len']=df['ab_mrm_to_back']+df['bc_back_to_back']+df['cd_back_to_1c']+df['de_1c_to_1c']+df['ef_1c_to_back']+df['fg_back_to_back']+df['gh_back_to_mrm']+df['hi_mrm_to_mrm']
+
+		# drop outliers
+		time_fields = [
+			'ab_mrm_to_back',
+			'bc_back_to_back',
+			'cd_back_to_1c',
+			'de_1c_to_1c',
+			'ef_1c_to_back',
+			'fg_back_to_back',
+			'gh_back_to_mrm',
+			'hi_mrm_to_mrm'
+		]
+		
+		for field in time_fields:
+			df = df[np.abs(df[field]-df[field].mean()) <= (2.3*df[field].std())]
+			# keep only the ones that are within +2.3 to -2.3 standard deviations in the 'field' column.
+
+		# plot	
+		plot_versions(df,func = 'bidphotoadd', title = params.iloc()[0].title+'. log ttl: mean bidphotoadd')
+		#plot_versions(df,func = 'bidlist', title = params.iloc()[0].title+'. log ttl: bidlist')
+		#plot_versions(df,'bidinfo')
+		df['day'] = df['date'].str.split().str[0]
+		plot_dates(df,title = params.iloc()[0].title+'. log ttl: mean date')
 
 	return web.Response(text='ok',content_type="text/html")
 
