@@ -165,7 +165,7 @@ async def call_log_ttl_report(request):
 		]
 		
 		for field in time_fields:
-			df = df[np.abs(df[field]-df[field].mean()) <= (2.3*df[field].std())]
+			df = df[np.abs(df[field]-df[field].mean()) <= (2.2*df[field].std())]
 			# keep only the ones that are within +2.3 to -2.3 standard deviations in the 'field' column.
 
 		# plot	
