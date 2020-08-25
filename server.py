@@ -66,9 +66,9 @@ def plot_versions(df,func,title):
 	fig.savefig(script_path+'myplot.png')
 	send_photo()
 
-def plot_dates(df,title):
+def plot_dates(df,func,title):
 	script_path = '/home/dvasilev/projects/log_ttl_report/'
-	graphic = df.groupby('day').mean().plot(        
+	graphic = df[df.func==func].groupby('day').mean().plot(        
 		y=[
 			'ab_mrm_to_back',
 			'bc_back_to_back',
@@ -176,10 +176,8 @@ async def call_log_ttl_report(request):
 
 		# plot	
 		plot_versions(df,func = 'bidphotoadd', title = params.iloc()[0].title+'. log ttl: mean bidphotoadd')
-		#plot_versions(df,func = 'bidlist', title = params.iloc()[0].title+'. log ttl: bidlist')
-		#plot_versions(df,'bidinfo')
 		df['day'] = df['date'].str.split().str[0]
-		plot_dates(df,title = params.iloc()[0].title+'. log ttl: mean date')
+		plot_dates(df,func = 'bidphotoadd',title = params.iloc()[0].title+'. log ttl: mean date')
 		os.unlink(file_path_data)		
 	
 	os.unlink(file_path_params)
