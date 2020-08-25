@@ -100,8 +100,8 @@ async def call_log_ttl_report(request):
 	params_part = True
 	with open(data_path+'data.csv', 'rb') as source_file:
 		lines = source_file.readlines()
-		with open('params.csv', 'wb') as params_file:
-			with open('data_clear.csv', 'wb') as data_file:
+		with open(data_path+'params.csv', 'wb') as params_file:
+			with open(data_path+'data_clear.csv', 'wb') as data_file:
 				for line in lines:
 					if line==b'id;date;phone;ttl;AppVersion;osversion;devicename;Backend\n':
 						params_part = False
@@ -112,11 +112,11 @@ async def call_log_ttl_report(request):
 			data_file.close()
 		params_file.close()
 	source_file.close()
-	params = pd.read_csv("params.csv",';')
+	params = pd.read_csv(data_path+'params.csv',';')
 
 	if params.iloc()[0].send_report:
 
-		df = pd.read_csv('data_clear.csv',';')
+		df = pd.read_csv(data_path+'data_clear.csv',';')
 		df.fillna(0, inplace=True)
 
 		# ttl
