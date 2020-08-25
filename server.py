@@ -175,9 +175,9 @@ async def call_log_ttl_report(request):
 			# keep only the ones that are within +2.3 to -2.3 standard deviations in the 'field' column.
 
 		# plot	
-		plot_versions(df,func = 'bidphotoadd', title = params.iloc()[0].title+'. log ttl: mean bidphotoadd')
+		plot_versions(df,func = 'bidphotoadd', title = params.iloc()[0].title+'. log ttl: bidphotoadd, mean by version')
 		df['day'] = df['date'].str.split().str[0]
-		plot_dates(df,func = 'bidphotoadd',title = params.iloc()[0].title+'. log ttl: mean date')
+		plot_dates(df,func = 'bidphotoadd',title = params.iloc()[0].title+'. log ttl: bidphotoadd, mean by date')
 		os.unlink(file_path_data)		
 	
 	os.unlink(file_path_params)
