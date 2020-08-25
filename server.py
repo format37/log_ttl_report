@@ -4,6 +4,8 @@ import asyncio
 import pandas as pd
 import numpy as np
 import telebot
+from uuid import uuid4
+import os
 
 def send_photo():
 	script_path = '/home/dvasilev/projects/log_ttl_report/'
@@ -88,20 +90,24 @@ def plot_dates(df,title):
 	send_photo()
 
 async def call_log_ttl_report(request):
-
-	#data_path = '/home/dvasilev/projects/log_ttl_report/'
+	
 	data_path = '/var/www/html/log_ttl_data/'
+	call_uid = str(uuid4()) # filename contains uid because call can be parallel
+	file_path_data			= data_path+'data_'			+call_uid+'.csv'
+	file_path_params		= data_path+'params_'		+call_uid+'.csv'
+	file_path_data_clean	= data_path+'data_clean_'	+call_uid+'.csv'
 
-	# save data
-	with open(data_path+'data.csv', 'w') as file: # change filename to token if call can be parallel
-		file.write(await request.text())		
+	# save data	
+	with open(file_path_data, 'w') as source_file: 
+		source_file.write(await request.text())
+	source_file.close()
 
 	# read data
 	params_part = True
-	with open(data_path+'data.csv', 'rb') as source_file:
+	with open(file_path_data, 'rb') as source_file:
 		lines = source_file.readlines()
-		with open(data_path+'params.csv', 'wb') as params_file:
-			with open(data_path+'data_clear.csv', 'wb') as data_file:
+		with open(file_path_params, 'wb') as params_file:
+			with open(file_path_data_clean, 'wb') as data_file:
 				for line in lines:
 					if line==b'id;date;phone;ttl;AppVersion;osversion;devicename;Backend\n':
 						params_part = False
@@ -112,11 +118,11 @@ async def call_log_ttl_report(request):
 			data_file.close()
 		params_file.close()
 	source_file.close()
-	params = pd.read_csv(data_path+'params.csv',';')
+	params = pd.read_csv(file_path_params,';')
 
 	if params.iloc()[0].send_report:
 
-		df = pd.read_csv(data_path+'data_clear.csv',';')
+		df = pd.read_csv(file_path_data_clean,';')
 		df.fillna(0, inplace=True)
 
 		# ttl
@@ -174,8 +180,13 @@ async def call_log_ttl_report(request):
 		#plot_versions(df,'bidinfo')
 		df['day'] = df['date'].str.split().str[0]
 		plot_dates(df,title = params.iloc()[0].title+'. log ttl: mean date')
+		os.unlink(file_path_data)		
+	
+	os.unlink(file_path_params)
+	os.unlink(file_path_data_clean)
+	result = 'https://service.icecorp.ru/log_ttl_data/data_'+call_uid+'.csv'
 
-	return web.Response(text='ok',content_type="text/html")
+	return web.Response(text=result,content_type="text/html")
 
 app = web.Application(client_max_size=1024**3)	
 app.router.add_post('/log_ttl_report', call_log_ttl_report)
